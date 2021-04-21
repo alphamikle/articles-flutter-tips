@@ -2,6 +2,7 @@ import 'package:anitex/anitex.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tipsalc/order/view/money_row.dart';
 
 import '../../constants/input.dart';
 import '../../constants/padding.dart';
@@ -23,13 +24,24 @@ class OrderView extends StatefulWidget {
 }
 
 class _OrderViewState extends State<OrderView> {
+  /// We will use Flutter 2.0 with Dart 2.12
+  /// which offer you null-safety
   late OrderState orderState;
 
   @override
   void initState() {
     super.initState();
+
+    /// For state management we will
+    /// use simple [setState] method
+    /// But to prevent placing business logic
+    /// in UI layer - we will take out it in
+    /// separate class [OrderState]
     orderState = OrderState()
       ..registerHook(() {
+        /// We pass method [setState] to our
+        /// OrdersState class, where this method
+        /// will called after any data updates
         setState(() {});
       })
       ..initState();
@@ -49,6 +61,8 @@ class _OrderViewState extends State<OrderView> {
       padding: const EdgeInsets.all(Pad.l1),
       child: Column(
         children: [
+          /// This is first field with
+          /// amount of just order
           TextFormField(
             decoration: InputDec.outline8.copyWith(
               labelText: Locale.billTotalLabel,
@@ -56,10 +70,16 @@ class _OrderViewState extends State<OrderView> {
             keyboardType: TextInputType.number,
             controller: orderState.billTotalController,
             inputFormatters: [
+              /// We will using formatter
+              /// for prevent input non-digit symbols
+              /// in our input
               NumberFormatter(),
             ],
           ),
           const VDivider(),
+
+          /// Second field with amount of tips
+          /// in percents
           TextFormField(
             decoration: InputDec.outline8.copyWith(
               labelText: Locale.tipPercentLabel,
@@ -71,6 +91,9 @@ class _OrderViewState extends State<OrderView> {
             ],
           ),
           const VDivider(level: DividerLevel.l2),
+
+          /// This is two ours text lines with
+          /// total amount of tips in dollars
           Row(
             children: [
               Text(
@@ -85,19 +108,17 @@ class _OrderViewState extends State<OrderView> {
             ],
           ),
           const VDivider(),
-          Row(
-            children: [
-              Text(
-                Locale.totalAmountTitle,
-                style: infoStyle,
-              ),
-              AnimatedText(
-                Utils.formatMoney(orderState.order.totalWithTipAmount),
-                style: infoStyle.copyWith(fontWeight: FontWeight.bold),
-                useOpacity: false,
-              ),
-            ],
+
+          /// And the second row with total amount
+          /// of all order (just order + tips in dollars)
+          MoneyRow(
+            title: Locale.totalAmountTitle,
+            money: orderState.order.totalWithTipAmount,
           ),
+
+          /// Well, there we have a visual helper to manipulate
+          /// tips quantity - you can simple increase or reduce
+          /// the amount of tips with step in 5%
           Expanded(
             child: Center(
               child: Column(
